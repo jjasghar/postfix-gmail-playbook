@@ -1,0 +1,70 @@
+- name: Set up Postfix to go through Gmail
+  hosts: all
+
+  tasks:
+
+    - name: Fetch the variables from var file
+      include_vars:
+        file: ../vars/main.yaml
+
+    - name: Verify that postfix is installed
+      package:
+        name: 
+          - postfix
+        state: latest
+
+    - name: over write the main.cf file
+      template:
+        src: ../templates/main.cf.j2
+        dest: /etc/postfix/main.cf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: drop the generic file in
+      template:
+        src: ../templates/generic.j2
+        dest: /etc/postfix/generic
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: run postmap against generic
+      shell: postmap generic
+      args:
+        chdir: /etc/postfix
+
+    - name: create the sasl directory
+      file:
+        path: /etc/postfix/sasl
+        state: directory
+
+    - name: drop the passwd file in
+      template:
+        src: ../templates/passwd.j2
+        dest: /etc/postfix/sasl/passwd
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: run postmap against passwd
+      shell: postmap passwd
+      args:
+        chdir: /etc/postfix/sasl
+
+    - name: change passwd.db permissions
+      file:
+        path: /etc/postfix/sasl/passwd.db
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: enable the postfix service
+      service:
+        name: postfix
+        enabled: yes
+
+    - name: restart the postfix service
+      service:
+        name: postfix
+        state: restarted
