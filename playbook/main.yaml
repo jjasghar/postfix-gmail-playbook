@@ -11,6 +11,7 @@
       package:
         name: 
           - postfix
+          - mailx
         state: latest
 
     - name: over write the main.cf file
