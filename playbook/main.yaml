@@ -12,6 +12,9 @@
         name: 
           - postfix
           - mailx
+          - cyrus-sasl 
+          - cyrus-sasl-lib
+          - cyrus-sasl-plain
         state: latest
 
     - name: over write the main.cf file
